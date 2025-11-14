@@ -1,5 +1,5 @@
 - name: Deploy application container
-  hosts: webservers
+  hosts: all
   become: yes
   vars:
     docker_image: 64rq/my-image:latest
