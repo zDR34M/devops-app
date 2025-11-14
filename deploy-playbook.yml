@@ -1,0 +1,30 @@
+- name: Deploy application container
+  hosts: webservers
+  become: yes
+  vars:
+    docker_image: 64rq/my-image:latest
+    container_name: web-container
+    publish_port: "5000:5000"
+
+  tasks:
+    - name: Stop running container (if exists)
+      ansible.builtin.shell: |
+        docker ps -q -f name={{ container_name }} | grep -q . && docker stop {{ container_name }} || true
+      ignore_errors: yes
+
+    - name: Remove stopped container (if exists)
+      ansible.builtin.shell: |
+        docker ps -a -q -f name={{ container_name }} | grep -q . && docker rm {{ container_name }} || true
+      ignore_errors: yes
+
+    - name: Remove old image (if exists)
+      ansible.builtin.shell: |
+        docker images -q {{ docker_image }} | grep -q . && docker rmi {{ docker_image }} || true
+      ignore_errors: yes
+
+    - name: Pull latest image
+      ansible.builtin.shell: docker pull {{ docker_image }}
+
+    - name: Run new container
+      ansible.builtin.shell: |
+        docker run -d --name {{ container_name }} -p {{ publish_port }} {{ docker_image }}
