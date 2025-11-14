@@ -23,6 +23,7 @@ jobs:
           IMAGE_NAME: my-image
         run: |
           docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME .
+          docker tag $DOCKERHUB_USERNAME/$IMAGE_NAME $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
           docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
 
   test:
@@ -46,7 +47,8 @@ jobs:
 
 
   deploy:
-    runs-on: ubunto-latest
+    runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v6-beta
@@ -59,8 +61,6 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa
 
       - name: Deploy to EC2 using Ansible
         run: |
