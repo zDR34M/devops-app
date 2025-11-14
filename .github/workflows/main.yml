@@ -54,7 +54,9 @@ jobs:
         uses: actions/checkout@v6-beta
       
       - name: Install Ansible
-        uses: rishabhc32/install-ansible@v1.2.2
+        run: |  
+          sudo apt update
+          sudo apt install -y ansible
 
       - name: Configure SSH
         run: |
