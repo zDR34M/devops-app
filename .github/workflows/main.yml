@@ -43,3 +43,29 @@ jobs:
         run: |
           pip install pytest
           pytest test.py
+
+
+  deploy:
+    runs-on: ubunto-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6-beta
+      
+      - name: Install Ansible
+        uses: rishabhc32/install-ansible@v1.2.2
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+
+      - name: Deploy to EC2 using Ansible
+        run: |
+          ansible-playbook deploy-playbook.yml \
+            -i "${{ secrets.SERVER_IP }}," \
+            -u ubuntu \
+            --private-key ~/.ssh/id_rsa \
+            --ssh-common-args="-o StrictHostKeyChecking=no"
